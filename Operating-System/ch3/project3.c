@@ -62,27 +62,66 @@ static void proc_exit(void)
 static ssize_t proc_read(struct file *file, char __user *usr_buf, size_t count, loff_t *pos)
 {
         int rv = 0;
-        char buffer[BUFFER_SIZE];
+        
+        // buffer_point +=1000;
         static int completed = 0;
         struct task_struct *tsk = NULL;
 
         if (completed) {
                 completed = 0;
                 return 0;
+        }    
+
+        tsk = pid_task(find_vpid(1), PIDTYPE_PID);
+        struct list_head *children = &tsk->children;
+        printk("command = [%s] pid = [%d] state=[%ld]\n",tsk->comm,tsk->pid,tsk->state);
+        // struct list_head *next = children->next;
+        // tsk = list_entry(&children, struct task_struct, sibling);   
+        int i = 0;
+        int j = 0;
+        char buffer[BUFFER_SIZE]; //buffsize 128
+        char *usr_point = usr_buf;
+        char *buffer_point = buffer;
+        for_each_process(tsk){
+        //     rv = printk("command = [%s] pid = [%d] state=[%ld]\n",tsk->comm,tsk->pid,tsk->state);
+            rv = sprintf(usr_point,"command = [%s] pid = [%d] state=[%ld]\n",tsk->comm,tsk->pid,tsk->state);
+        //     rv = sprintf(buffer_point,"command = [%s] pid = [%d] state=[%ld]\n",tsk->comm,tsk->pid,tsk->state);
+            usr_point += rv;
+        //     buffer_point += rv;
+        //     rv = sprintf(buffer_point,"command = [%s]",tsk->comm);
+        //     buffer_point += rv;
+        //     i += rv;
+        //     rv = sprintf(buffer_point,"pid = [%d] ",tsk->pid);
+        //     buffer_point += rv;
+        //     i += rv;
+        //     rv = sprintf(buffer_point,"state=[%ld]\n",tsk->state);
+        //     buffer_point += rv;
+        //     copy_to_user(usr_buf, buffer, rv);
+        //     rv = sprintf(buffer,"comman\n");
+        //     buffer_point += 40;
+            j+=1;
+            i += rv;
+        //     printk("%d ",rv);
         }
-        // rv = sprintf(buffer, "%lu\n",count);
-        // rv = sprintf(buffer, "%ld\n",l_pid);
-        // copy_to_user(usr_buf, buffer, rv);
-        tsk = pid_task(find_vpid(l_pid), PIDTYPE_PID);
+        // printk("%d %d\n",i,j);
+        // copy_to_user(usr_buf, buffer, i);
+        // rv = 0;
+        // tsk = pid_task(find_vpid(l_pid), PIDTYPE_PID);
 
         completed = 1;
-        sprintf(buffer,"command = [%s] pid = [%d] state=[%d]",tsk->comm,tsk->pid,tsk->state)
+        if(tsk == NULL)
+                rv = sprintf(buffer,"PID doesn't exit\n");
+        else;
+                // rv = sprintf(buffer,"command = [%s] pid = [%d] state=[%ld]\n",tsk->comm,tsk->pid,tsk->state);
+                // rv = sprintf(buffer_point,"success");
+                
+            
         // copies the contents of kernel buffer to userspace usr_buf 
-        if (copy_to_user(usr_buf, buffer, rv)) {
-                rv = -1;
-        }
+        // if (copy_to_user(usr_buf, buffer, rv)) {
+        //         rv = -1;
+        // }
 
-        return rv;
+        return i;
 }
 
 /**
