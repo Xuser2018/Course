@@ -76,7 +76,7 @@ static ssize_t proc_read(struct file *file, char __user *usr_buf, size_t count, 
         tsk = pid_task(find_vpid(l_pid), PIDTYPE_PID);
 
         completed = 1;
-        sprintf(buffer,"command = [%s] pid = [%d] state=[%d]",tsk->comm,tsk->pid,tsk->state)
+        rv = sprintf(buffer,"command = [%s] pid = [%d] state=[%d]\n",tsk->comm,tsk->pid,tsk->state);
         // copies the contents of kernel buffer to userspace usr_buf 
         if (copy_to_user(usr_buf, buffer, rv)) {
                 rv = -1;
