@@ -1,2 +1,2 @@
 # Course
-Some courses Operating System
+Some courses Operating System and Computer Networking
